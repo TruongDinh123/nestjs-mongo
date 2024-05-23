@@ -6,6 +6,7 @@ import * as Joi from '@hapi/joi';
 import { AuthenticationModule } from './authentication/authentication.module';
 import CategoriesModule from './categories/categories.module';
 import SeriesModule from './series/series.module';
+import ProductModule from './products/product.module';
 
 @Module({
   imports: [
@@ -26,7 +27,7 @@ import SeriesModule from './series/series.module';
         const host = configService.get('MONGO_HOST');
 
         return {
-          uri: `mongodb://${username}:${password}@${host}`,
+          uri: `mongodb://${host}/${database}`,
           dbName: database,
         };
       },
@@ -36,6 +37,7 @@ import SeriesModule from './series/series.module';
     AuthenticationModule,
     CategoriesModule,
     SeriesModule,
+    ProductModule,
   ],
   controllers: [],
   providers: [],

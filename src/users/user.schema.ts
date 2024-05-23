@@ -35,18 +35,14 @@ export class User {
   @Type(() => Address)
   address: Address;
 
-  @Prop({
-    get: (creditCardNumber: string) => {
-      if (!creditCardNumber) {
-        return;
-      }
-      const lastFourDigits = creditCardNumber.slice(
-        creditCardNumber.length - 4,
-      );
-      return `****-****-****-${lastFourDigits}`;
-    },
-  })
-  creditCardNumber?: string;
+  @Prop({ required: true })
+  roles: [string];
+
+  @Prop()
+  isBlock: boolean;
+
+  @Prop({ default: 'active', enum: ['active', 'inactive'] })
+  status: string;
 
   @Type(() => Post)
   posts: Post[];
