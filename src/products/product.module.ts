@@ -10,6 +10,7 @@ import {
 } from './product.schema';
 import ProductsController from './product.controller';
 import ProductFactory from './product.service';
+import ProductRepository from 'src/models/repo/product.repo';
 
 @Module({
   imports: [
@@ -20,6 +21,6 @@ import ProductFactory from './product.service';
     ]),
   ],
   controllers: [ProductsController],
-  providers: [ProductFactory],
+  providers: [ProductFactory, ProductRepository],
 })
 export default class ProductModule {}
