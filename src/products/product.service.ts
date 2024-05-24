@@ -10,7 +10,8 @@ import {
 } from './product.schema';
 import { Model } from 'mongoose';
 import ProductDto from './dto/product.dto';
-import RequestWithUser from 'src/authentication/requestWithUser.interface';
+import ProductRepository from 'src/models/repo/product.repo';
+import PublishProductByShopDto from './dto/publishProduct.dto';
 
 @Injectable()
 class ProductFactory {
@@ -25,6 +26,7 @@ class ProductFactory {
     @InjectModel(Clothing.name) private clothingModel: Model<ClothingDocument>,
     @InjectModel(Electronics.name)
     private electronicsModel: Model<ElectronicsDocument>,
+    private productRepository: ProductRepository,
   ) {}
 
   async createProduct(
@@ -32,7 +34,6 @@ class ProductFactory {
     createProductDto: ProductDto,
   ): Promise<ProductDocument | ClothingDocument | ElectronicsDocument> {
     const productClass = ProductFactory.productRegistry[type];
-    console.log('🚀 ~ productClass:', productClass);
     if (!productClass) {
       throw new BadRequestException(
         `Product type ${type} not found in product registry`,
@@ -44,6 +45,37 @@ class ProductFactory {
       this.electronicsModel,
     );
     return serviceInstance.createProduct(createProductDto);
+  }
+
+  // PUT //
+  async publishProductByShop({
+    product_id,
+    product_account,
+  }: PublishProductByShopDto) {
+    const shop = await this.productRepository.publishProductByShop({
+      product_id,
+      product_account,
+    });
+    return shop;
+  }
+
+  //query//
+  async findAllDraftsForShop({ product_account, limit = 50, skip = 0 }: any) {
+    const query = { product_account, isDraft: true };
+    return await this.productRepository.findAllDraftForShop({
+      query,
+      limit,
+      skip,
+    });
+  }
+
+  async findAllPublishForShop({ prodct_account, limit = 50, skip = 0 }: any) {
+    const query = { prodct_account, isPublish: true };
+    return await this.productRepository.findAllPublishForShop({
+      query,
+      limit,
+      skip,
+    });
   }
 }
 
@@ -63,21 +95,17 @@ class ProductService {
       _id: product_id,
       product_account: createProductDto.product_account,
     });
-    console.log('🚀 ~ newProduct service:', newProduct);
     return newProduct;
   }
 }
 
 //Define sub-class for different product types Clothing
 class ClothingService extends ProductService {
-  async createProduct(createProductDto: ProductDto): Promise<ClothingDocument> {
-    console.log('🚀 ~ createProductDto:', createProductDto);
-    console.log('Clothing Model:', this.clothingModel);
+  async createProduct(createProductDto: ProductDto) {
     const newClothing = await this.clothingModel.create({
       ...createProductDto.product_attributes,
       product_account: createProductDto.product_account,
     });
-    console.log('🚀 ~ newClothing:', newClothing);
     if (!newClothing) {
       throw new BadRequestException('Tạo mới clothing không thành công');
     }
@@ -87,25 +115,38 @@ class ClothingService extends ProductService {
       _id: newClothing._id,
       product_account: createProductDto.product_account,
     };
-    console.log('🚀 ~ productData:', productData);
 
-    try {
-      const newProduct = await super.createProduct(
-        productData,
-        newClothing._id.toString(),
-      );
-      console.log('🚀 ~ newProduct:', newProduct);
-    } catch (error) {
-      console.error('Error creating product:', error);
-      throw new BadRequestException(
-        'Failed to create product due to data validation error.',
-      );
+    const newProduct = await super.createProduct(productData, newClothing._id);
+
+    return newProduct;
+  }
+}
+
+class ElectronicsService extends ProductService {
+  async createProduct(createProductDto: ProductDto) {
+    const newElectronic = await this.electronicModel.create({
+      ...createProductDto.product_attributes,
+      product_account: createProductDto.product_account,
+    });
+    if (!newElectronic) {
+      throw new BadRequestException('Tạo mới electronic không thành công');
     }
-    return newClothing;
+    const productData = {
+      ...createProductDto,
+      _id: newElectronic._id,
+      product_account: createProductDto.product_account,
+    };
+    const newProduct = await super.createProduct(
+      productData,
+      newElectronic._id,
+    );
+
+    return newProduct;
   }
 }
 
 ///register new product types
 ProductFactory.registerProductType('Clothing', ClothingService);
+ProductFactory.registerProductType('Electronics', ElectronicsService);
 
 export default ProductFactory;

@@ -39,7 +39,6 @@ export class Product {
     type: mongoose.Schema.Types.ObjectId,
     ref: User.name,
   })
-  @Type(() => User)
   product_account: User;
 
   @Prop({ required: true, type: mongoose.Schema.Types.Mixed })
@@ -56,7 +55,7 @@ export class Product {
   @Prop({ type: Array, default: [] })
   product_variations: any[];
 
-  @Prop({ default: true, index: true, select: true })
+  @Prop({ default: true, index: true, select: true }) //select: hide khi find 1 product
   isDraft: boolean;
 
   @Prop({ default: false, index: true, select: false })
@@ -67,36 +66,44 @@ export class Product {
 export class Electronics {
   @Transform(({ value }) => value.toString())
   _id: ObjectId;
+
   @Prop({ required: true })
   manufacturer: string;
+
   @Prop({ required: true })
   model: string;
+
   @Prop({ required: true })
   color: string;
+
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: User.name,
   })
   @Type(() => User)
-  product_account: User;
+  product_account: User | ObjectId;
 }
 
 @Schema({ collection: 'clothes', timestamps: true })
 export class Clothing {
   @Transform(({ value }) => value.toString())
   _id: ObjectId;
+
   @Prop({ required: true })
   brand: string;
+
   @Prop({ required: true })
   size: string;
+
   @Prop({ required: true })
   meterial: string;
+
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: User.name,
   })
   @Type(() => User)
-  product_account: User;
+  product_account: User | ObjectId;
 }
 
 export const ProductSchema = SchemaFactory.createForClass(Product);
@@ -105,6 +112,7 @@ export const ClothingSchema = SchemaFactory.createForClass(Clothing);
 
 ProductSchema.index({ product_name: 'text', product_description: 'text' });
 
+//Document middleware : runs before .save() and .create()...
 ProductSchema.pre<Product>('save', function (next) {
   this.product_slug = slugify(this.product_name, { lower: true });
   next();
