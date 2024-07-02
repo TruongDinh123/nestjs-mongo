@@ -17,7 +17,7 @@ import RequestWithUser from 'src/authentication/requestWithUser.interface';
 import ProductFactory from './product.service';
 import { PaginationParams } from 'src/utils/paginationParams';
 import ParamsWithId from 'src/utils/paramsWithId';
-import { ObjectId, Types } from 'mongoose';
+import { Types } from 'mongoose';
 
 @Controller('products')
 @UseInterceptors(MongooseClassSerializerInterceptor(Product))
@@ -46,7 +46,6 @@ export default class ProductsController {
     @Param() { id }: ParamsWithId,
     @Req() req: RequestWithUser,
   ) {
-    console.log('🚀 ~ id:', id);
     const productId = new Types.ObjectId(id); // Chuyển đổi id thành ObjectId
     const productAccountId = new Types.ObjectId(req.user._id); // Chuyển đổi user._id thành ObjectId
     return this.productFactory.publishProductByShop({
