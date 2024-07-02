@@ -1,10 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import PublishProductByShopDto from 'src/products/dto/publishProduct.dto';
 import { Product, ProductDocument } from 'src/products/product.schema';
 import { PaginationParams } from 'src/utils/paginationParams';
-import * as mongoose from 'mongoose';
 @Injectable()
 class ProductRepository {
   constructor(
@@ -32,14 +30,12 @@ class ProductRepository {
     return findAll;
   }
 
-  async publishProductByShop(dto: PublishProductByShopDto) {
-    console.log('🚀 ~ dto:', dto);
+  async publishProductByShop({ product_id, product_account }: any) {
     const query = {
-      _id: dto.product_id, // Đã là ObjectId
-      product_account: dto.product_account, // Đã là ObjectId
+      _id: product_id,
+      product_account: product_account,
     };
     const foundshop = await this.productModel.findOne(query);
-    console.log('🚀 ~ foundshop:', foundshop);
     if (!foundshop) return null;
 
     foundshop.isDraft = false;

@@ -24,8 +24,7 @@ class ProductFactory {
   constructor(
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
     @InjectModel(Clothing.name) private clothingModel: Model<ClothingDocument>,
-    @InjectModel(Electronics.name)
-    private electronicsModel: Model<ElectronicsDocument>,
+    @InjectModel(Electronics.name) private electronicsModel: Model<ElectronicsDocument>,
     private productRepository: ProductRepository,
   ) {}
 
