@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, ObjectId } from 'mongoose';
-import { Exclude, Transform, Type } from 'class-transformer';
+import { Exclude, Expose, Transform, Type } from 'class-transformer';
 import { Address, AddressSchema } from './address.schema';
 import { Post } from '../posts/post.schema';
 
@@ -17,18 +17,20 @@ export class User {
   _id: ObjectId;
 
   @Prop({ unique: true })
+  @Expose()
   email: string;
 
   @Prop()
   firstName: string;
 
   @Prop()
+  @Expose()
   lastName: string;
 
   fullName: string;
 
   @Prop()
-  @Exclude()
+  @Exclude() // - dùng để ẩn thông tin password trong response
   password: string;
 
   @Prop({ type: AddressSchema })

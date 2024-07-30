@@ -7,6 +7,8 @@ import {
   UseGuards,
   Get,
   UseInterceptors,
+  ClassSerializerInterceptor,
+  SerializeOptions,
 } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
 import RegisterDto from './dto/register.dto';
@@ -17,6 +19,7 @@ import { User } from '../users/user.schema';
 import MongooseClassSerializerInterceptor from '../utils/mongooseClassSerializer.interceptor';
 
 @Controller('authentication')
+@UseInterceptors(ClassSerializerInterceptor)
 @UseInterceptors(MongooseClassSerializerInterceptor(User))
 export class AuthenticationController {
   constructor(private readonly authenticationService: AuthenticationService) {}
