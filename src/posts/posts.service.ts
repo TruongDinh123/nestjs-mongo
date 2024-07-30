@@ -7,6 +7,7 @@ import PostDto from './dto/post.dto';
 import { User } from '../users/user.schema';
 import * as mongoose from 'mongoose';
 import UpdatePostDto from './dto/updatePost.dto';
+import PostNotFoundexception from './exception/postNotfund.exception';
 
 @Injectable()
 class PostsService {
@@ -57,7 +58,7 @@ class PostsService {
       .populate('categories')
       .populate('series');
     if (!post) {
-      throw new NotFoundException();
+      throw new PostNotFoundexception(id);
     }
     return post;
   }

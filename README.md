@@ -1,73 +1,91 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
-</p>
+npx protoc --plugin=protoc-gen-ts_proto=".\\node_modules\\.bin\\protoc-gen-ts_proto.cmd"
+--ts_proto_out=./ --ts_proto_opt=nestJs=true ./proto/auth.proto
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+nest generated apps auth
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+In general, the request lifecycle looks like the following:
 
-## Description
+1.Incoming request
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+2.Middleware
+2.1. Globally bound middleware
+2.2. Module bound middleware
 
-## Installation
+3.Guards
+3.1 Global guards
+3.2 Controller guards
+3.3 Route guards
 
-```bash
-$ npm install
-```
+4.Interceptors (pre-controller)
+4.1 Global interceptors
+4.2 Controller interceptors
+4.3 Route interceptors
 
-## Running the app
+5.Pipes
+5.1 Global pipes
+5.2 Controller pipes
+5.3 Route pipes
+5.4 Route parameter pipes
 
-```bash
-# development
-$ npm run start
+6.Controller (method handler)
 
-# watch mode
-$ npm run start:dev
+7.Service (if exists)
 
-# production mode
-$ npm run start:prod
-```
+8.Interceptors (post-request)
+8.1 Route interceptor
+8.2 Controller interceptor
+8.3 Global interceptor
 
-## Test
+9.Exception filters
+9.1 route
+9.2 controller
+9.3 global
 
-```bash
-# unit tests
-$ npm run test
+10.Server response
 
-# e2e tests
-$ npm run test:e2e
+1. @Controller() decorator:
 
-# test coverage
-$ npm run test:cov
-```
+   - NestJS sử dụng rất nhiều decorators(Trình trang trí).
+   - Để đánh dấu 1 class là 1 controller.
+   - @Controller() decorator: Chúng ta sẽ truyền 1 optional argument cho nó.
+   - Ví dụ: @Controller('posts')
+   - Và nó hoạt động như 1 path prefix sẽ dẫn tới các routes trong controller đấy.
 
-## Support
+2. Data Transfer Object (DTO): DTO sẽ xác định kiểu dữ liệu được gửi trong 1 request.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+   - DTO có thể là 1 interface hoặc 1 class
 
-## Stay in touch
+3. Ưu điểm của NestJS so với Express:
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+   - NestJS cung cấp rất nhiều thứ vượt trội hơn trong việc thiết kế API và sử dụng các controller.
+   - Ngược lại Express.js sẽ giúp chúng ta linh hoạt hơn không việc thiết kế API nhưng sẽ không trạng bị cho chúng ta những
+     công cụ như NestJS để tăng khả năng readability of our code.
+   - Ưu điểm khác của NestJS là cung cấp các provides để xử lí các đối tượng Request và Response 1 cách linh hoạt như là:
+     @Body() và @Params() sẽ giúp bạn improve trong việc readability of our code.
 
-## License
+4. @Injectable() decorator sẽ cho NestJs biết rằng 1 class là 1 provider. và chúng ta có thể thêm nó vào module.
 
-Nest is [MIT licensed](LICENSE).
+5. Module:
+
+   - Chúng ta sử dụng modules để tổ chức các ứng dụng của mình.
+   - Ví dụ PostControler và PostService chúng có closely related. Vì vậy chúng nên đặt trong cùng 1 module.
+
+6. Entity:
+
+    - Entity là 1 class sẽ máp tới database table bằng cách sử dụng @Entoty() decorator
+
+7 Repository:
+
+    - Dùng để quản lí cụ thể các entity.
+    - Repository nó có thể multiple các funtions và tương tác với entities bằng cách sử dụng lại TypeOrmModule
+
+8 Execution Context:
+
+    - ArgumentsHost` cung cấp phương thức để truy xuất các đối số được truyền đến handler
+    và cho phép chọn bối cảnh phù hợp (HTTP, RPC, hoặc WebSockets) để lấy các đối số.
+
+    - ExecutionContext mở rộng từ ArgumentsHost, cung cấp thêm chi tiết về quá trình thực thi hiện tại, bao gồm kiểu của
+    controller và handler sắp được gọi
+
+    - Các phương thức như `switchToHttp()`, `switchToRpc()`, và `switchToWs()` giúp chuyển đổi sang bối cảnh phù hợp
+    từ đó có thể truy xuất các đối tượng cụ thể như request, response trong HTTP, hoặc client và data trong WebSockets.
