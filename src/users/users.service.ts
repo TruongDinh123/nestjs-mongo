@@ -6,12 +6,14 @@ import CreateUserDto from './dto/createUser.dto';
 import PostsService from '../posts/posts.service';
 import { InjectConnection } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
+import { FilesService } from 'src/files/files.service';
 
 @Injectable()
 class UsersService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     private readonly postsService: PostsService,
+    private readonly fileService: FilesService,
     @InjectConnection() private readonly connection: mongoose.Connection,
   ) {}
 
@@ -43,6 +45,35 @@ class UsersService {
     }
 
     return user;
+  }
+
+  async addAvatar(userId: string, imageBuffer: Buffer, filename: string) {
+    const user = await this.userModel.findById(userId);
+
+    if (!user) {
+      throw new NotFoundException();
+    }
+
+    const avatar = await this.fileService.uploadPublicFile(
+      imageBuffer,
+      filename,
+    );
+
+    user.avatar = avatar;
+
+    await user.save();
+
+    return avatar;
+  }
+
+  async deleteAvatar(userId: string) {
+    const user = await this.userModel.findById(userId);
+    const fileId = user?.avatar?._id.toString();
+
+    if (fileId) {
+      await this.userModel.updateOne({ _id: userId }, { avatar: undefined });
+      await this.fileService.deletePublicFile(fileId);
+    }
   }
 
   async create(userData: CreateUserDto) {
