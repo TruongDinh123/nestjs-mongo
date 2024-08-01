@@ -1,10 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import { Document, ObjectId } from 'mongoose';
 import { Exclude, Expose, Transform, Type } from 'class-transformer';
 import { Address, AddressSchema } from './address.schema';
 import { Post } from '../posts/post.schema';
 import { PublicFile } from 'src/files/publicFile.schema';
-import { PrivateFile } from 'src/privateFiles/privateFile.entity';
+import { PrivateFile } from 'src/privateFiles/privateFile.schema';
 
 export type UserDocument = User & Document;
 
@@ -55,10 +55,9 @@ export class User {
   avatar?: PublicFile;
 
   @Prop({
-    type: Types.ObjectId,
-    ref: PrivateFile.name,
+    type: PrivateFile,
+    ref: 'PrivateFile',
   })
-  @Type(() => PrivateFile)
   files: PrivateFile[];
 }
 
