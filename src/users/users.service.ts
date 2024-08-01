@@ -7,6 +7,7 @@ import PostsService from '../posts/posts.service';
 import { InjectConnection } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { FilesService } from 'src/files/files.service';
+import { PrivateFilesService } from 'src/privateFiles/privateFile.service';
 
 @Injectable()
 class UsersService {
@@ -14,6 +15,7 @@ class UsersService {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     private readonly postsService: PostsService,
     private readonly fileService: FilesService,
+    private readonly privateFilesService: PrivateFilesService,
     @InjectConnection() private readonly connection: mongoose.Connection,
   ) {}
 
@@ -64,6 +66,52 @@ class UsersService {
     await user.save();
 
     return avatar;
+  }
+
+  async addPrivateFile(userId: string, imageBuffer: Buffer, filename: string) {
+    const newFile = await this.privateFilesService.uploadPrivateFile(
+      userId,
+      imageBuffer,
+      filename,
+    );
+
+    await this.userModel.findByIdAndUpdate(userId, {
+      $push: { files: newFile },
+    });
+
+    return newFile;
+  }
+
+  async getPrivateFile(userId: string, filedId: string) {
+    const file = await this.privateFilesService.getPrivateFile(filedId);
+
+    if (file.info.owner._id.toString() === userId) {
+      console.log('🚀 ~ owner._id', file.info.owner._id.toString());
+      return file;
+    }
+    throw new NotFoundException();
+  }
+
+  async getAllPrivateFiles(userId: string) {
+    const userWithFiles = await this.userModel.findById(userId);
+
+    if (userWithFiles) {
+      if (userWithFiles.files && Array.isArray(userWithFiles.files)) {
+        return Promise.all(
+          userWithFiles.files.map(async (file) => {
+            const url = await this.privateFilesService.generatePresignedUrl(
+              file.key,
+            );
+            return {
+              ...file,
+              url,
+            };
+          }),
+        );
+      }
+      throw new NotFoundException('No files found for this user');
+    }
+    throw new NotFoundException('User with this id does not exist');
   }
 
   async deleteAvatar(userId: string) {
