@@ -46,8 +46,8 @@ export default class ProductsController {
     @Param() { id }: ParamsWithId,
     @Req() req: RequestWithUser,
   ) {
-    const productId = new Types.ObjectId(id); // Chuyển đổi id thành ObjectId
-    const productAccountId = new Types.ObjectId(req.user._id); // Chuyển đổi user._id thành ObjectId
+    const productId = new Types.ObjectId(); // Chuyển đổi id thành ObjectId
+    const productAccountId = new Types.ObjectId(); // Chuyển đổi user._id thành ObjectId
     return this.productFactory.publishProductByShop({
       product_id: productId,
       product_account: productAccountId,
