@@ -48,6 +48,10 @@ export class User {
   @Prop({ default: 'active', enum: ['active', 'inactive'] })
   status: string;
 
+  @Prop()
+  @Exclude()
+  currentHashedRefreshToken?: string;
+
   @Type(() => Post)
   posts: Post[];
 

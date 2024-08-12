@@ -8,6 +8,7 @@ import CategoriesModule from './categories/categories.module';
 import SeriesModule from './series/series.module';
 import ProductModule from './products/product.module';
 import { UsersModule } from './users/users.module';
+import { BookingModule } from './booking/booking.module';
 
 @Module({
   imports: [
@@ -20,6 +21,15 @@ import { UsersModule } from './users/users.module';
 
         JWT_SECRET: Joi.string().required(),
         JWT_EXPIRATION_TIME: Joi.string().required(),
+
+        JWT_ACCESS_TOKEN_SECRET: Joi.string().required(),
+        JWT_ACCESS_TOKEN_EXPIRATION_TIME: Joi.string().required(),
+        JWT_REFRESH_TOKEN_SECRET: Joi.string().required(),
+        JWT_REFRESH_TOKEN_EXPIRATION_TIME: Joi.string().required(),
+
+        GOOGLE_CLIENT_ID: Joi.string().required(),
+        GOOGLE_CLIENT_SECRET: Joi.string().required(),
+        GOOGLE_CALLBACK_URL: Joi.string().required(),
 
         AWS_REGION: Joi.string().required(),
         AWS_ACCESS_KEY_ID: Joi.string().required(),
@@ -48,6 +58,7 @@ import { UsersModule } from './users/users.module';
     SeriesModule,
     ProductModule,
     UsersModule,
+    BookingModule,
   ],
   controllers: [],
   providers: [],

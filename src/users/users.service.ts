@@ -8,6 +8,7 @@ import { InjectConnection } from '@nestjs/mongoose';
 import * as mongoose from 'mongoose';
 import { FilesService } from 'src/files/files.service';
 import { PrivateFilesService } from 'src/privateFiles/privateFile.service';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 class UsersService {
@@ -35,12 +36,7 @@ class UsersService {
   }
 
   async getById(id: string) {
-    const user = await this.userModel.findById(id).populate({
-      path: 'posts',
-      populate: {
-        path: 'categories',
-      },
-    });
+    const user = await this.userModel.findById(id);
 
     if (!user) {
       throw new NotFoundException();
@@ -137,13 +133,27 @@ class UsersService {
     return createdUser.save();
   }
 
+  async findOrCreate(user: Partial<User>) {
+    try {
+      let existingUser = await this.userModel.findOne({ email: user.email });
+      if (!existingUser) {
+        existingUser = new this.userModel(user);
+        existingUser.files = existingUser.files || [];
+        await existingUser.save();
+      }
+      return existingUser;
+    } catch (error) {
+      console.log('🚀 ~ error:', error);
+    }
+  }
+
   async delete(userId: string) {
     const session = await this.connection.startSession();
 
     session.startTransaction();
     try {
       const user = await this.userModel
-        .findByIdAndDelete(userId)
+        .findByIdAndDelete(userId, { useFindAndModify: false })
         .populate('posts')
         .session(session);
 
@@ -162,6 +172,26 @@ class UsersService {
       throw error;
     } finally {
       session.endSession();
+    }
+  }
+
+  async setCurrentRefreshToken(refreshToken: string, userId: string) {
+    const currentHashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+    await this.userModel.findByIdAndUpdate(userId, {
+      currentHashedRefreshToken,
+    });
+  }
+
+  async getUserIfRefreshTokenMatches(refreshToken: string, userId: string) {
+    const user = await this.getById(userId);
+
+    const isRefreshTokenMatching = await bcrypt.compare(
+      refreshToken,
+      user.currentHashedRefreshToken || '',
+    );
+
+    if (isRefreshTokenMatching) {
+      return user;
     }
   }
 }
